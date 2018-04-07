@@ -6,9 +6,6 @@ language_tabs: # must be one of https://git.io/vQNgJ
 
 toc_footers:
 
-includes:
-  - errors
-
 search: false
 ---
 #   
@@ -16,11 +13,9 @@ search: false
 
 ## API Reference
 
-Eatsa provides a simple and powerful REST API to integrate into our ordering and Cubby pick up system.
+Welcome to eatsa's API!  You can use this API to access all our API endpoints to integrate with the eatsa platform.
 
-Requests can be made to place and update orders, get an order ETA status, as well as retrieve information about stores.
-
-All request bodies should have content type `application/json` and be valid JSON.
+Requests can be made to submit and update orders, get an order ETA status, as well as retrieve information about stores.  All requests should be made over SSL. All request and response bodies, including errors, are encoded in JSON.  Make sure all request bodies have content type `application/json` and are valid JSON.
 
 ## API Enviornments
 
@@ -29,23 +24,6 @@ All request bodies should have content type `application/json` and be valid JSON
 Production | https://api.eatsa.com
 Staging    | https://api.stage.eatsa.com
 
-
-## Interacting with the API
-
-Status codes
-
- Id | Code | Description
---------- | ------- | -----------
-200 | OK | Successful request
-201 | Created | New object saved
-204 | No content | Object deleted
-400 | Bad Request | Returns JSON with the error message
-401 | Unauthorized | Couldn’t authenticate your request
-403 | Invalid scope | User hasn’t authorized necessary scope
-404 | Not Found | No such object
-500 | Internal Server Error | Something went wrong
-503 | Service Unavailable | Your connection is being throttled or the service is down for maintenance
-
 # Authentication
 
 > Example Request
@@ -53,36 +31,85 @@ Status codes
 ```curl
 curl "http://api.eatsa.com/v1/stores" \
 	-X GET -i -H "Content-Type:application/json; charset=utf-8" \
-	-H "X-Authtoken:42b41067303bw46o6d4636eeb621we62o0cq1q71q4b"	
+	-H "X-Authtoken:42b41067303bw46o6d4636eeb621we62o0cq1qdsr4b"
 ```
 
 Authenticate your account by including your secret key in every API Request. Please be sure to keep your API key secure, do not share your secret API key in publicly accessible areas such GitHub, client-side code, and so forth.
 
-To authenticate an API request include the following header `-H "X-Authtoken:42b41067303bw46o6d4636eeb621we62o0cq1q71q4b"` in every request.
+To authenticate an API request include the following header `-H "X-Authtoken:42b41067303bw46o6d4636eeb621we62o0cq1qdsr4b"` in every request.
 
 All API requests must be made over HTTPS. Calls made over plain HTTP will fail. API requests without authentication will also fail.
 
-To request an authentication API please contact us at support@eatsa.com.
+To request an authentication API please contact your account manager.
+
+# Errors
+
+
+## HTTP status codes
+
+ Code | Title | Description
+--------- | ------- | -----------
+200 | OK | Everything worked as expected.
+201	| Created	| The resource was successfully created.
+400 | Bad Request | The request was unacceptable, often due to missing a required parameter.
+401 | Unauthorized | No valid API key provided.
+402 | Request Failed | The parameters were valid but the request failed.
+404 | Not Found | The requested resource doesn't exist.
+429 | Too Many Requests | Too many requests hit the API too quickly.  We recommend an exponential backoff of your requests.
+500, 502, 503, 504 | Internal Server Error | Something went wrong on our end.
+
+## Error response
+
+> Generic error response (4xx, 5xx)
+
+```json
+{
+  "error": {
+    "id": "NOT_FOUND",
+    "message": "Not found"
+  }
+}
+```
+> Validation failed (400)
+
+```json
+{
+  "error": {
+    "id": "INVALID_INPUT",
+    "message": "Invalid request"
+  }
+}
+```
+
+All error messages will return an `id` and a human readable `message`.
+
+Important: Different error types `id` can be added and removed over time so you should make sure your application accepts new ones as well.
+
+Error id | Code | Description
+--------- | ------- | -----------
+INVALID_INPUT | 400  | Invalid request
+VALIDATION_ERROR | 400  | Validation Error
+ORDER_TIMESLOT_FULL | 400  | Invalid order time slot
+ORDER_TIMESLOT_PAST | 400  | Invalid order time slot
+FIRE_ORDER_LOCK_TIMEOUT | 400  | Server was unable to change an order's state
+DUPLICATE_ORDER | 400  | Duplicate order
+INVALID_PROMO_CODE | 400  | Invalid promo code
+INVALID_PROMO_CODE | 400 | Invalid promo code
+UNPUBLISHED_PROMO | 400 | Unpublished promo code
+SINGLE_USE_PROMO_ALREADY_ASSIGNED | 400 | Single use promo code has already been assigned
+PROMO_ALREADY_ASSIGNED_TO_OTHER_USER | 400 | Promo code has already been assigned to another user
+PROMO_ALREADY_APPLIED_BY_USER | 400 | Promo code already applied by user
+INVALID_PROMO_ACTIVATION_DATES | 400 | Invalid promo code activation dates
+MULTI_USE_PROMO_CAP_REACHED | 400 |Promo code cap reached
+STORE_CLOSED | 400  | Store closed
+UNAUTHORIZED | 401  | Unauthorized
+FORBIDDEN | 403  | Forbidden
+NOT_FOUND | 404  | Resource not found
+INTERNAL_SERVER_ERROR | 500  | Internal server error
 
 # Orders
 
-<!---
 What is an order and it's status
-
-### Order State
-
-Status | Description
---------- | -----------
-in_queue |  Initial state when an order is placed
-scheduled | State when a customer selects a window of future pickup.
-on_the_line | The order has been picked up is being processed, the customer's name will appear on the status board to inform them that their order is in progress.  
-ready_for_pickup| The order has been completed, at his point a Cubby number is assigned to the customer and presented on the status board.
-delivered_to_customer| The customer picks up their order.
-customer_canceled| The customer decides to cancel an order
-attendant_canceled| An employee decides to cancel an order.  
-hold_for_recubby| State when an order is kept in the kitchen for any reason.
-ready_to_recubby| State when an order has been held and the host can either manually deliver the without cubbies or they can iniciate a new cubby re assignment.
---->
 
 ## Order object
 
@@ -91,7 +118,7 @@ ready_to_recubby| State when an order has been held and the host can either manu
 ```json
 {
   "id": "2eecef15-c638-44a2-a133-64789f9929b1",
-  "client_sent_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
+  "ref_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
   "user_id": "98cf8eba-45cd-4f2c-9541-dbf611c4456c",
   "store_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
   "cubby_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
@@ -101,22 +128,36 @@ ready_to_recubby| State when an order has been held and the host can either manu
   "scheduled_time": "2018-04-02T21:30:50.000Z",
   "status": "ready_for_pickup",
   "human_readable_id": 208,
-  "status_board_display_name": "Jessie B"
+  "user_display_name": "Jessie B"
 }
 ```
 
 Parameter | Description
 --------- | -----------
-id | Unique ID that identifies the created order
-client_sent_id | Unique ID that identifies the order request from the clients side 
-user_id | Unique ID that identifies the user who created the orders 
-store_id | Unique ID that identifies the store where the order was created 
-created_at | Time the order was created 
-updated_at | Time the order was last updated 
-scheduled_time | Optional, indicates the time an order is scheduled at if it was specified on creation
+id | Unique ID that identifies the order.
+ref_id | Reference ID for the order in the partner system.  This ID is expected to be unique.
+user_id | Unique ID that identifies the user who created the orders.
+store_id | Unique ID that identifies the store where the order was created.
+created_at | Time the order was created.
+updated_at | Time the order was last updated.
+scheduled_time | Optional, indicates the time an order is scheduled at if it was specified on creation.
 status | Status of the order, initial state is `in_queue`.
-human_readable_id | Human readable ID that can be displayed to the customer
-status_board_display_name | Name that will be displayed on the status board to inform the customer of their order.
+human_readable_id | Human readable ID that can be displayed to the customer.
+user_display_name | Name that will be displayed on the status board to inform the customer of their order.
+
+## Order State
+
+Status | Description
+--------- | -----------
+in_queue |  The order is in the active queue.
+scheduled | The order is scheduled for a pickup time in the future.
+on_the_line | The order has left the queue and is now in process.  
+ready_for_pickup | The order has been completed.
+delivered_to_customer | The customer has picked up their order.
+customer_canceled | The customer has canceled an order.
+attendant_canceled | An employee has canceled an order.  
+hold_for_recubby | The order is being held in the kitchen.
+ready_to_recubby | An order that has been held is now ready to be delivered to the customer.
 
 ## Create an order
 
@@ -126,14 +167,14 @@ status_board_display_name | Name that will be displayed on the status board to i
 curl "https://api.eatsa.com/v1/orders" \
 	-X POST -i -H "Content-Type:application/json; charset=utf-8" \
 	-d '{
-	      "client_sent_id": "92312332",
-	      "store_id":"418fdc10-5881-11e4-8ed6-0800200c9a66", 
+	      "ref_id": "92312332",
+	      "store_id":"418fdc10-5881-11e4-8ed6-0800200c9a66",
 	      "user": {
-	          "first_name": "Jessie", 
+	          "first_name": "Jessie",
 	          "last_name": "Brown"
 	      }
       }'
-	          
+
 ```
 
 > Example Response
@@ -141,7 +182,7 @@ curl "https://api.eatsa.com/v1/orders" \
 ```json
 {
   "id": "2eecef15-c638-44a2-a133-64789f9929b1",
-  "client_sent_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
+  "ref_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
   "user_id": "98cf8eba-45cd-4f2c-9541-dbf611c4456c",
   "store_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
   "created_at": "2018-04-02T21:29:25.233Z",
@@ -149,11 +190,11 @@ curl "https://api.eatsa.com/v1/orders" \
   "scheduled_time": "2018-04-02T21:30:50.000Z",
   "status": "in_queue",
   "human_readable_id": 208,
-  "status_board_display_name": "Jessie B"
+  "user_display_name": "Jessie B"
 }
 ```
 
-Place an order in the queue. Orders have an initial state of `in_queue` and have a unique id that will be used to track the order and modify its state accordingly. 
+Creates a new order in the eatsa system. Orders have an initial state of `in_queue` and have a unique id that will be used to track the order and modify its state accordingly.
 
 <!---
 Once an order is `in_queue` it will be scheduled for processing.
@@ -167,10 +208,10 @@ Once an order is `in_queue` it will be scheduled for processing.
 
 Parameter | Required | Description
 --------- | ------- | -----------
-client_sent_id | yes  | Unique ID that identifies the order request from the clients side
+ref_id | no  | The reference ID for the order in the partner system.  This ID is expected to be unique.
 store_id | yes | Store where the order will be created
 user | yes | Basic customer details, first and last name
-timeslot_start_time| no | Defines a pickup time that enables orders to be scheduled. Expected format: '2018-04-02T21:30:50.000Z'. The available time slots for a store can be retrieved from the 'Find store available time slots' API.
+requested_timeslot | no | Defines a pickup time that enables orders to be scheduled. Expected format: '2018-04-02T21:30:50.000Z'. The available time slots for a store can be retrieved from the 'Find store available time slots' API.
 
 ### Response Arguments
 
@@ -191,7 +232,7 @@ curl "https://api.eatsa.com/v1/orders/2eecef15-c638-44a2-a133-64789f9929b1" \
 ```json
 {
   "id": "2eecef15-c638-44a2-a133-64789f9929b1",
-  "client_sent_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
+  "ref_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
   "user_id": "98cf8eba-45cd-4f2c-9541-dbf611c4456c",
   "store_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
   "created_at": "2018-04-02T21:29:25.233Z",
@@ -199,11 +240,11 @@ curl "https://api.eatsa.com/v1/orders/2eecef15-c638-44a2-a133-64789f9929b1" \
   "scheduled_time": "2018-04-02T21:30:50.000Z",
   "status": "in_queue",
   "human_readable_id": 208,
-  "status_board_display_name": "Jessie B"
+  "user_display_name": "Jessie B"
 }
 ```
 
-Retrieve order information. 
+Retrieve order information.
 
 
 ### Endpoint
@@ -221,17 +262,13 @@ id | yes  | Order id
 Refer to order object
 
 
-## Mark an order as ready for pickup
+## Order Ready
 
 > Example Request
 
 ```curl
-curl "https://api.eatsa.com/v1/orders/2eecef15-c638-44a2-a133-64789f9929b1" \
-    -X PUT -i -H "Content-Type:application/json; charset=utf-8" \
-    -d '{
-          "status": "ready_for_pickup"
-        }'
-
+curl "https://api.eatsa.com/v1/orders/2eecef15-c638-44a2-a133-64789f9929b1/ready" \
+    -X POST -i -H "Content-Type:application/json; charset=utf-8"
 ```
 
 > Example Response
@@ -239,7 +276,7 @@ curl "https://api.eatsa.com/v1/orders/2eecef15-c638-44a2-a133-64789f9929b1" \
 ```json
 {
   "id": "2eecef15-c638-44a2-a133-64789f9929b1",
-  "client_sent_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
+  "ref_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
   "user_id": "98cf8eba-45cd-4f2c-9541-dbf611c4456c",
   "store_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
   "cubby_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
@@ -249,36 +286,30 @@ curl "https://api.eatsa.com/v1/orders/2eecef15-c638-44a2-a133-64789f9929b1" \
   "scheduled_time": "2018-04-02T21:30:50.000Z",
   "status": "ready_for_pickup",
   "human_readable_id": 208,
-  "status_board_display_name": "Jessie B"
+  "user_display_name": "Jessie B"
 }
 ```
 
-Change the state of an order to 'ready_for_pickup', this indicates that the order has been  fulfilled by the back of house and is ready to be delivered to the customer. At this point a cubby name is assigned to place the order, at the same time the customer will be notified of the his cubby assignment. 
+Change the state of an order to 'ready_for_pickup', this indicates that the order has been fulfilled by the back of house and is ready to be delivered to the customer. At this point a cubby will be assigned to the order.  This endpoint should only be called when the full order is completed.
 
 ### HTTP Request
 
-`PUT https://api.eatsa.com/v1/orders/:order_id`
-
-### Request Arguments
-
-Parameter | Description
---------- | -----------
-status | State to transition order into
+`POST https://api.eatsa.com/v1/orders/:order_id/ready`
 
 ### Response Arguments
 
 Refer to order object
 
 
-## Cancel order by customer
+## Cancel order
 
 > Example Request
 
 ```curl
-    curl "https://api.eatsa.com/v1/orders/2eecef15-c638-44a2-a133-64789f9929b1" \
-    -X PUT -i -H "Content-Type:application/json; charset=utf-8" \
+    curl "https://api.eatsa.com/v1/orders/2eecef15-c638-44a2-a133-64789f9929b1/cancel" \
+    -X POST -i -H "Content-Type:application/json; charset=utf-8" \
     -d '{
-          "status": "customer_canceled"
+          "type": "customer"
         }'
 
 ```
@@ -288,7 +319,7 @@ Refer to order object
 ```json
 {
   "id": "2eecef15-c638-44a2-a133-64789f9929b1",
-  "client_sent_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
+  "ref_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
   "user_id": "98cf8eba-45cd-4f2c-9541-dbf611c4456c",
   "store_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
   "cubby_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
@@ -298,74 +329,26 @@ Refer to order object
   "scheduled_time": "2018-04-02T21:30:50.000Z",
   "status": "customer_canceled",
   "human_readable_id": 208,
-  "status_board_display_name": "Jessie B"
+  "user_display_name": "Jessie B"
 }
 ```
 
-The customer decides to cancel their order, this changes the order state to `customer_canceled`.
+The order will be canceled.  We support two types of canceled orders, `customer` or `attendant` depending on the person that is canceling the order.
 
 ### HTTP Request
 
-`PUT https://api.eatsa.com/v1/orders/:order_id`
+`POST https://api.eatsa.com/v1/orders/:order_id/cancel`
 
 ### Request Arguments
 
 Parameter | Description
 --------- | -----------
-status | State to transition order into
+type | `customer` or `attendant`, the person that is canceling the order.
 
 ### Response Arguments
 
 Refer to order object
 
-
-## Cancel order by attendant
-
-> Example Request
-
-```curl
-    curl "https://api.eatsa.com/v1/orders/2eecef15-c638-44a2-a133-64789f9929b1" \
-    -X PUT -i -H "Content-Type:application/json; charset=utf-8" \
-    -d '{
-          "status": "attendant_canceled"
-        }'
-
-```
-
-> Example Response
-
-```json
-{
-  "id": "2eecef15-c638-44a2-a133-64789f9929b1",
-  "client_sent_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
-  "user_id": "98cf8eba-45cd-4f2c-9541-dbf611c4456c",
-  "store_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
-  "cubby_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
-  "cubby_name": "14",
-  "created_at": "2018-04-02T21:29:25.233Z",
-  "updated_at": "2018-04-02T21:29:25.681Z",
-  "scheduled_time": "2018-04-02T21:30:50.000Z",
-  "status": "attendant_canceled",
-  "human_readable_id": 208,
-  "status_board_display_name": "Jessie B"
-}
-```
-
-An attendant decides to cancel an order, this changes the order state to `attendant_canceled`.
-
-### HTTP Request
-
-`PUT https://api.eatsa.com/v1/orders/:order_id`
-
-### Request Arguments
-
-Parameter | Description
---------- | -----------
-status | State to transition order into
-
-### Response Arguments
-
-Refer to order object
 
 ## Retrieve order ETA
 
@@ -389,7 +372,7 @@ Retrieve Order ETA in seconds.
 
 ### HTTP Request
 
-`GET https://api.eatsa.com/v1//orders/:order_id/estimated_time_remaining`
+`GET https://api.eatsa.com/v1/orders/:order_id/estimated_time_remaining`
 
 ### Response
 
@@ -421,7 +404,6 @@ estimated_time_remaining | Estimated time in seconds before the order is process
   "timezone": "America/Los_Angeles",
   "mobile_orders_disabled": false,
   "business_page_url": "https://goo.gl/maps/Awz8xPMx1EH2",
-  "client_assets": {},
   "store_hours": [
     {
       "day_of_week": "Monday",
@@ -448,14 +430,36 @@ estimated_time_remaining | Estimated time in seconds before the order is process
       "open_time": "07:30:00",
       "close_time": "23:00:00"
     }
-  ],
-  "overridden_store_hours": []
+  ]
 }
 ```
 
 Parameter | Description
 --------- | -----------
-id | Unique ID store id
+id | Unique ID of the store.
+created_at | Time the store was created.
+updated_at | Time the store was last updated.
+status | The current state of the store, `open` or `closed`.
+phone_number | The phone number of the store.
+address | The street address of the store.
+locality | The location of the store, usually the city in the US.
+region | The geographic region of the store, usually the state in the US.
+postcode | The postcode for the store, in the US also referred to as the zip code.
+country | The country where the store is located.  This follows the [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) standard.
+latitude | The latitude of the store location.
+longitude | The longitude of the store location.
+timezone | The timezone that the store follows.  This is used to determine the store hours.
+mobile_orders_disabled | A boolean value, used to determine if the store is accepting mobile orders.
+business_page_url | The url for this store.
+store_hours | An array of the hours that a store will be open.
+
+### Store hours
+
+Parameter | Description
+--------- | -----------
+day_of_week | The day of the week for the hours.
+open_time | The open time of the store based on the timezone for this store.  Represented in the format `HH:MM:SS`.
+close_time | The close time of the store based on the timezone for this store.  Represented in the format `HH:MM:SS`.
 
 
 ## Retrieve a store
@@ -486,7 +490,6 @@ curl "https://api.eatsa.com/v1/stores/418fdc10-5881-11e4-8ed6-0800200c9a66" \
   "timezone": "America/Los_Angeles",
   "mobile_orders_disabled": false,
   "business_page_url": "https://goo.gl/maps/Awz8xPMx1EH2",
-  "client_assets": {},
   "store_hours": [
     {
       "day_of_week": "Monday",
@@ -513,8 +516,7 @@ curl "https://api.eatsa.com/v1/stores/418fdc10-5881-11e4-8ed6-0800200c9a66" \
       "open_time": "07:30:00",
       "close_time": "23:00:00"
     }
-  ],
-  "overridden_store_hours": []
+  ]
 }
 ```
 Retrieve a specific store.
@@ -565,7 +567,6 @@ curl "https://api.eatsa.com/v1/stores" \
       "timezone": "America/Los_Angeles",
       "mobile_orders_disabled": false,
       "business_page_url": "https://goo.gl/maps/Awz8xPMx1EH2",
-      "client_assets": {},
       "store_hours": [
         {
           "day_of_week": "Monday",
@@ -592,8 +593,7 @@ curl "https://api.eatsa.com/v1/stores" \
           "open_time": "07:30:00",
           "close_time": "23:00:00"
         }
-      ],
-      "overridden_store_hours": []
+      ]
     },
     {...},
     {...}
@@ -720,4 +720,3 @@ Parameter | Description
 estimated_time_now | Estimated time for an order to be processed
 timeslot_duration | Seconds between each time slot
 reservable_timeslots | List of available start times to schedule an order
-
