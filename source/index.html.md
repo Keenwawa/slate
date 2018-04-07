@@ -196,7 +196,7 @@ curl "https://api.eatsa.com/v1/orders" \
 }
 ```
 
-Creates a new order in the eatsa system. Orders have an initial state of `in_queue` and have a unique id that will be used to track the order and modify its state accordingly.
+Creates a new order in the eatsa system. Orders have an initial status of `scheduled` if a `requested_timeslot` is provided.  If no `requested_timeslot` is provided then it is assumed the order should be delivered as soon as possible and the status will `in_queue`.  A unique id for the order is returned that can be used to track the order and modify its state accordingly.
 
 <!---
 Once an order is `in_queue` it will be scheduled for processing.
@@ -212,8 +212,19 @@ Parameter | Required | Description
 --------- | ------- | -----------
 ref_id | no  | The reference ID for the order in the partner system.  This ID is expected to be unique.
 store_id | yes | Store where the order will be created
-user | yes | Basic customer details, first and last name
+user | yes | The user object (see below)
 requested_timeslot | no | Defines a pickup time that enables orders to be scheduled. Expected format: '2018-04-02T21:30:50.000Z'. The available time slots for a store can be retrieved from the 'Find store available time slots' API.
+
+### User object
+The caller must pass either an `id` for a user in our user store or the `first_name` and `last_name` of a user that is not already in our user store.
+
+Parameter | Required | Description
+--------- | ------- | -----------
+id | no  | The unique id of the user in our user store.
+first_name | no | The first name of the user.
+last_name | no | The last name of the user.
+
+
 
 ### Response Arguments
 
