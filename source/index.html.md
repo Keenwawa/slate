@@ -17,7 +17,7 @@ Welcome to eatsa's API!  You can use this API to access all our API endpoints to
 
 Requests can be made to submit and update orders, get an order ETA status, as well as retrieve information about stores.  All requests should be made over SSL. All request and response bodies, including errors, are encoded in JSON.  Make sure all request bodies have content type `application/json` and are valid JSON.
 
-## API Enviornments
+## API Environments
 
  Environment | Endpoint
 -----------------  | --------------------------------
@@ -66,7 +66,7 @@ To request an authentication token for our API please contact your account manag
 {
   "error": {
     "id": "NOT_FOUND",
-    "message": "Not found"
+    "message": "Resource not found"
   }
 }
 ```
@@ -109,9 +109,11 @@ INTERNAL_SERVER_ERROR | 500  | Internal server error
 
 # Orders
 
-What is an order and it's status
+This section covers our endpoints for creating an order or modifying the state of an order.
 
 ## Order object
+
+What is an order and its status
 
 > Example Order object
 
