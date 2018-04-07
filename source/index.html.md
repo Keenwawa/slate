@@ -29,7 +29,7 @@ Staging    | https://api.stage.eatsa.com
 > Example Request
 
 ```curl
-curl "http://api.eatsa.com/v1/stores" \
+curl "https://api.eatsa.com/v1/stores" \
 	-X GET -i -H "Content-Type:application/json; charset=utf-8" \
 	-H "X-Authtoken:42b41067303bw46o6d4636eeb621we62o0cq1qdsr4b"
 ```
@@ -54,6 +54,7 @@ To request an authentication token for our API please contact your account manag
 400 | Bad Request | The request was unacceptable, often due to missing a required parameter.
 401 | Unauthorized | No valid API key provided.
 402 | Request Failed | The parameters were valid but the request failed.
+403 | Invalid scope | The API
 404 | Not Found | The requested resource doesn't exist.
 429 | Too Many Requests | Too many requests hit the API too quickly.  We recommend an exponential backoff of your requests.
 500, 502, 503, 504 | Internal Server Error | Something went wrong on our end.
@@ -123,8 +124,8 @@ What is an order and its status
   "ref_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
   "user_id": "98cf8eba-45cd-4f2c-9541-dbf611c4456c",
   "store_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
-  "cubby_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
-  "cubby_name": "14",
+  "pickup_location_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
+  "pickup_location_display_name": "14",
   "created_at": "2018-04-02T21:29:25.233Z",
   "updated_at": "2018-04-02T21:29:25.681Z",
   "scheduled_time": "2018-04-02T21:30:50.000Z",
@@ -211,16 +212,18 @@ Once an order is `in_queue` it will be scheduled for processing.
 Parameter | Required | Description
 --------- | ------- | -----------
 ref_id | no  | The reference ID for the order in the partner system.  This ID is expected to be unique.
+ref_human_readable_id | no | The reference human readable ID for the order in the partner system.  If this ID is not included then we will generate a human readable ID for the order.
 store_id | yes | Store where the order will be created
 user | yes | The user object (see below)
 requested_timeslot | no | Defines a pickup time that enables orders to be scheduled. Expected format: '2018-04-02T21:30:50.000Z'. The available time slots for a store can be retrieved from the 'Find store available time slots' API.
 
 ### User object
-The caller must pass either an `id` for a user in our user store or the `first_name` and `last_name` of a user that is not already in our user store.
+The caller must pass either an `id` for a user in our user store or the `ref_id`, `first_name` and `last_name` of a user that is not already in our user store.
 
 Parameter | Required | Description
 --------- | ------- | -----------
-id | no  | The unique id of the user in our user store.
+id | no  | The unique ID of the user in our user store.
+ref_id | no  | The reference ID for the user in the partner system.  This ID is expected to be unique.
 first_name | no | The first name of the user.
 last_name | no | The last name of the user.
 
@@ -262,7 +265,7 @@ Retrieve order information.
 
 ### Endpoint
 
-`GET https://api.eatsa.com/v1/orders/:order_id`
+`GET https://api.eatsa.com/v1/orders/:id`
 
 ### Request Arguments
 
@@ -292,8 +295,8 @@ curl "https://api.eatsa.com/v1/orders/2eecef15-c638-44a2-a133-64789f9929b1/ready
   "ref_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
   "user_id": "98cf8eba-45cd-4f2c-9541-dbf611c4456c",
   "store_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
-  "cubby_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
-  "cubby_name": "14",
+  "pickup_location_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
+  "pickup_location_display_name": "14",
   "created_at": "2018-04-02T21:29:25.233Z",
   "updated_at": "2018-04-02T21:29:25.681Z",
   "scheduled_time": "2018-04-02T21:30:50.000Z",
@@ -303,11 +306,11 @@ curl "https://api.eatsa.com/v1/orders/2eecef15-c638-44a2-a133-64789f9929b1/ready
 }
 ```
 
-Change the state of an order to 'ready_for_pickup', this indicates that the order has been fulfilled by the back of house and is ready to be delivered to the customer. At this point a cubby will be assigned to the order.  This endpoint should only be called when the full order is completed.
+This indicates that the order has been fulfilled by the back of house and is ready to be delivered to the customer.  Our system will update the status of an order to be 'ready_for_pickup'.  At this point a pickup location will be assigned to the order.  This endpoint should only be called when the full order is completed.
 
 ### HTTP Request
 
-`POST https://api.eatsa.com/v1/orders/:order_id/ready`
+`POST https://api.eatsa.com/v1/orders/:id/ready`
 
 ### Response Arguments
 
@@ -335,8 +338,8 @@ Refer to order object
   "ref_id": "96679B8C-B333-4046-BAD6-B358A97B6EE4",
   "user_id": "98cf8eba-45cd-4f2c-9541-dbf611c4456c",
   "store_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
-  "cubby_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
-  "cubby_name": "14",
+  "pickup_location_id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
+  "pickup_location_display_name": "14",
   "created_at": "2018-04-02T21:29:25.233Z",
   "updated_at": "2018-04-02T21:29:25.681Z",
   "scheduled_time": "2018-04-02T21:30:50.000Z",
@@ -350,7 +353,7 @@ The order will be canceled.  We support two types of canceled orders, `customer`
 
 ### HTTP Request
 
-`POST https://api.eatsa.com/v1/orders/:order_id/cancel`
+`POST https://api.eatsa.com/v1/orders/:id/cancel`
 
 ### Request Arguments
 
@@ -385,7 +388,7 @@ Retrieve Order ETA in seconds.
 
 ### HTTP Request
 
-`GET https://api.eatsa.com/v1/orders/:order_id/estimated_time_remaining`
+`GET https://api.eatsa.com/v1/orders/:id/estimated_time_remaining`
 
 ### Response
 
@@ -536,13 +539,13 @@ Retrieve a specific store.
 
 ### HTTP Request
 
-`GET https://api.eatsa.com/v1/orders/stores/:store_id`
+`GET https://api.eatsa.com/v1/orders/stores/:id`
 
 ### Request Arguments
 
 Parameter | Description
 --------- | ---------------------------
-store_id | Store id
+id | Store id
 
 
 ### Response Arguments
@@ -556,13 +559,17 @@ Refer to Store object
 ```curl
 curl "https://api.eatsa.com/v1/stores" \
 	-i -H "Content-Type:application/json; charset=utf-8" \
+  -d '{
+          "page": 1,
+          "page_size": 5
+      }'
 ```
 
 > Example Response
 
 ```json
 {
-  "count": 3,
+  "count": 123,
   "stores": [
     {
       "id": "418fdc10-5881-11e4-8ed6-0800200c9a66",
@@ -609,12 +616,21 @@ curl "https://api.eatsa.com/v1/stores" \
       ]
     },
     {...},
+    {...},
+    {...},
     {...}
   ]
 }
 ```
 
 Retrieve all stores where orders can be placed.
+
+### Request Arguments
+
+Parameter | Required | Description
+--------- | -------- | -------------------
+page | no | Page number for pagination, default is 1
+page_size | no | Number of results per page for pagination, default is 10
 
 ### Response Arguments
 
@@ -719,11 +735,11 @@ curl "https://api.eatsa.com/v1/stores/418fdc10-5881-11e4-8ed6-0800200c9a66/reser
 ```
 --->
 
-Find all the available times a store has to schedule an order
+Find all the available times a store has to schedule an order that day.
 
 ### HTTP Request
 
-`GET https://api.eatsa.com/v1/stores/:store_id/reservable_timeslots`
+`GET https://api.eatsa.com/v1/stores/:id/reservable_timeslots`
 
 
 ### Response Arguments
