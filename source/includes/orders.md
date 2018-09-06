@@ -99,7 +99,7 @@ timeslot_start_time| no | Defines a pickup time that enables orders to be schedu
 
 Parameter | Required | Description
 --------- | ------- | -----------
-ref_id | no  | The reference ID for the user in the partner system.  This ID is expected to be unique for the specified user.
+ref_id | yes | The reference ID for the user in the partner system.  This ID is expected to be unique for the specified user.
 first_name | yes | The first name of the user.
 last_name | yes | The last name of the user.
 
