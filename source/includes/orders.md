@@ -6,17 +6,30 @@
 
 ```json
 {
-    "id": "3f01ce65-bfe2-4411-a623-9440c73e40ae",
-    "ref_id": "o-20180510-0010",
-    "store_id": "518fdc10-5772-11e4-7ed6-0700200c9a11",
-    "pickup_location_id": "a08c4d73-8802-48fd-b278-5623508948d4",
-    "pickup_location_display_name": "1",
-    "created_at": "2018-05-15T22:01:41.115Z",
-    "updated_at": "2018-05-15T22:03:57.806Z",
-    "scheduled_time": "2018-05-15T22:05:57.806Z",
-    "status": "ready_for_pickup",
-    "user_ref_id": "u-0002",
-    "user_display_name": "John D"
+    "id": "9b38ece8-2abe-4eaa",
+    "ref_id": "o-20180808-933",
+    "store_id": "cb8c37f2",
+    "pickup_location_id": null,
+    "pickup_location_display_name": null,
+    "created_at": "2018-08-09T18:34:43.728Z",
+    "updated_at": "2018-08-09T18:34:43.744Z",
+    "status": "in_queue",
+    "human_readable_id": "103",
+    "user_id": "bbbf9e96-0c85",
+    "user_ref_id": "u-rx000002",
+    "status_board_display_name": "John",
+    "special_instructions": "",
+    "line_items": [
+        {
+            "id": "85ad92d7-a0e5-4b97-822c-f2dc67d8c40c",
+            "item_id": "bacfda02-2568-4fdf",
+            "item_name": "drink",
+            "customer_name": "John",
+            "special_instructions": "",
+            "location_id": null,
+            "location_name": null
+        }
+    ]
 }
 ```
 
@@ -32,7 +45,25 @@ created_at | Time the order was created.
 updated_at | Time the order was last updated.
 scheduled_time | Optional, indicates the time an order is scheduled at (if specified when the order was created creation)
 status | Status of the order
-user_display_name | Name that will be displayed on the status board to inform the customer of their order.
+human_readable_id | Human readable id for the order
+user_id | Unique ID of the user that made the order.
+user_ref_id | Reference ID for the user in the partner system.
+status_board_display_name | Name that will be displayed on the status board to inform the customer of their order.
+special_instructions | Text that indicates any special instructions for the order.
+
+### Line Item object
+
+Attribute | Description
+--------- | -----------
+id | Line Item unique ID 
+item_id | Item unique ID
+item_name | Item name
+customer_name | Customer name for the item.
+special_instructions | Text that indicates any special instructions for the item.
+location_id | Pickup station id.
+location_name | Pickup station human readable id.
+
+
 <!--- 
   last_cubbied_at | Timestamp that is updated every time an order is placed in a pickup location. 
 --->
@@ -51,29 +82,51 @@ curl -X POST \
   -H 'content-type: application/json; charset=utf-8' \
   -d '{
         "ref_id": "order123",
-        "store_id": "storeABC",
+        "store_id": "cb8c37f2",
         "user": {
           "ref_id": "user123",
           "first_name": "John",
-          "last_name": "Doe"
-        }
+          "last_name": "Doe",
+          "email": "john.doe@somedomain.com"
+        },
+        "status_board_display_name": "John",
+        "line_items": [
+          {
+            "ref_item_type": "drink"
+          }
+        ]
       }'
+
 ```
 
 > Create order response.
 
 ```json
 {
-    "id": "891bf5r64-d9d0-4001-a77a-7b73a69213b0",
+    "id": "9b38ece8-2abe-4eaa",
     "ref_id": "order123",
-    "store_id": "storeABC",
+    "store_id": "cb8c37f2",
     "pickup_location_id": null,
     "pickup_location_display_name": null,
-    "created_at": "2018-05-10T01:12:32.659Z",
-    "updated_at": "2018-05-10T01:12:32.659Z",
+    "created_at": "2018-08-09T18:34:43.728Z",
+    "updated_at": "2018-08-09T18:34:43.744Z",
     "status": "in_queue",
+    "human_readable_id": "103",
+    "user_id": "bbbf9e96-0c85",
     "user_ref_id": "user123",
-    "user_display_name": "John D"
+    "status_board_display_name": "John",
+    "special_instructions": "",
+    "line_items": [
+        {
+            "id": "85ad92d7-a0e5-4b97-822c-f2dc67d8c40c",
+            "item_id": "bacfda02-2568-4fdf",
+            "item_name": "drink",
+            "customer_name": "John",
+            "special_instructions": "",
+            "location_id": null,
+            "location_name": null
+        }
+    ]
 }
 ```
 
@@ -90,6 +143,8 @@ Parameter | Required | Description
 ref_id | yes  | The reference ID for the order in the partner system.  This ID is expected to be unique for every new order.
 store_id | yes | Store where the order will be created
 user | yes | The user object (see below)
+status_board_display_name | no | Name that will be displayed on the status board to inform the customer of their order. If not supplied the name will be infered from the user's first and last name.
+
 
 <!---
 timeslot_start_time| no | Defines a pickup time that enables orders to be scheduled. The available time slots for a store can be retrieved from the 'Find store available time slots' API.
@@ -102,6 +157,16 @@ Parameter | Required | Description
 ref_id | yes | The reference ID for the user in the partner system.  This ID is expected to be unique for the specified user.
 first_name | yes | The first name of the user.
 last_name | yes | The last name of the user.
+email | no | Email of the user.
+
+
+### Line Items
+
+List or items to order
+
+Parameter | Required | Description
+--------- | ------- | -----------
+ref_item_type | yes | Determines the type of item to order. Possible values "drink" or "food".
 
 
 ## Find an Order
@@ -117,16 +182,30 @@ curl "https://api.eatsa.com/v1/orders/2recef15-c638-23a2-a133-64789f9929b1" \
 
 ```json
 {
-    "id": "2recef15-c638-23a2-a133-64789f9929b1",
+    "id": "9b38ece8-2abe-4eaa",
     "ref_id": "order123",
-    "store_id": "storeABC",
-    "pickup_location_id": "a09c4d73-8802-49fd-b278-5623509948d4",
-    "pickup_location_display_name": "1",
-    "created_at": "2018-05-10T01:12:32.659Z",
-    "updated_at": "2018-05-10T01:13:32.659Z",
+    "store_id": "cb8c37f2",
+    "pickup_location_id": null,
+    "pickup_location_display_name": null,
+    "created_at": "2018-08-09T18:34:43.728Z",
+    "updated_at": "2018-08-09T18:35:56.744Z",
     "status": "ready_for_pickup",
+    "human_readable_id": "103",
+    "user_id": "bbbf9e96-0c85",
     "user_ref_id": "user123",
-    "user_display_name": "John D"
+    "status_board_display_name": "John",
+    "special_instructions": "",
+    "line_items": [
+        {
+            "id": "85ad92d7-a0e5-4b97-822c-f2dc67d8c40c",
+            "item_id": "bacfda02-2568-4fdf",
+            "item_name": "drink",
+            "customer_name": "John",
+            "special_instructions": "",
+            "location_id": "a09c4d73-8802-49fd-b278-5623509948d4",
+            "location_name": "1"
+        }
+    ]
 }
 ```
 
@@ -164,16 +243,30 @@ curl "https://api.eatsa.com/v1/stores/518fdc10-5772-11e4-7ed6-0700200c9a11/order
     "count": 9,
     "orders": [
         {
-          "id": "2recef15-c638-23a2-a133-64789f9929b1",
-          "ref_id": "order123",
-          "store_id": "518fdc10-5772-11e4-7ed6-0700200c9a11",
-          "pickup_location_id": "a09c4d73-8802-49fd-b278-5623509948d4",
-          "pickup_location_display_name": "1",
-          "created_at": "2018-05-10T01:12:32.659Z",
-          "updated_at": "2018-05-10T01:13:32.659Z",
-          "status": "ready_for_pickup",
-          "user_ref_id": "user123",
-          "user_display_name": "John D"
+            "id": "9b38ece8-2abe-4eaa",
+            "ref_id": "order123",
+            "store_id": "cb8c37f2",
+            "pickup_location_id": null,
+            "pickup_location_display_name": null,
+            "created_at": "2018-08-09T18:34:43.728Z",
+            "updated_at": "2018-08-09T18:35:56.744Z",
+            "status": "ready_for_pickup",
+            "human_readable_id": "103",
+            "user_id": "bbbf9e96-0c85",
+            "user_ref_id": "user123",
+            "status_board_display_name": "John",
+            "special_instructions": "",
+            "line_items": [
+                {
+                    "id": "85ad92d7-a0e5-4b97-822c-f2dc67d8c40c",
+                    "item_id": "bacfda02-2568-4fdf",
+                    "item_name": "drink",
+                    "customer_name": "John",
+                    "special_instructions": "",
+                    "location_id": "a09c4d73-8802-49fd-b278-5623509948d4",
+                    "location_name": "1",
+                }
+            ]
         },
         {...},
         {...},
@@ -200,16 +293,67 @@ storeId | yes  | Store id
 
 Refer to order object
 
+## Assign an item to a location
+
+> Example Request
+
+```curl
+curl -X POST \
+  https://api.eatsa.eatsa.com/v1/location/assign \
+  -H 'Content-Type: application/json; charset=utf-8' \
+  -d '{
+      "line_item_id": "85ad92d7-a0e5-4b97-822c-f2dc67d8c40c"
+   }'
+
+```
+
+> Example Response
+
+```json
+{
+    "location_id": "a09c4d73-8802-49fd-b278-5623509948d4",
+    "location_name": "1F",
+    "enabled": true,
+    "line_items": [
+        {
+            "id": "85ad92d7-a0e5-4b97-822c-f2dc67d8c40c"
+        }
+    ]
+}
+```
+
+This action reserves a location where the item can be placed.
+
+
+### Endpoint
+
+`POST https://api.eatsa.eatsa.com/v1/location/assign`
+
+### Request Arguments
+
+Parameter | Required | Description
+--------- | ------- | -----------
+line_item_id | yes  | Line item id to request a pickup location
+
+### Response Arguments
+
+Parameter | Description
+--------- | ------- | -----------
+location_id | Location Id
+location_name | Human readable location name
+enabled | Determines if a location is enabled
+line_items | List of items assigned to a location 
+
 
 ## Update an Order
 > Update order request.
 
 ```shell
 curl -X PUT \
-  https://api.eatsa.com/v1/orders/:eatsa_order_id \
+  https://api.eatsa.com/v1/orders/:order_id \
   -H 'content-type: application/json; charset=utf-8' \
   -d '{
-        "status": "ready_for_pickup"
+        "status": "on_the_line"
       }'
 ```
 
@@ -217,20 +361,34 @@ curl -X PUT \
 
 ```json
 {
-    "id": "891bf5r64-d9d0-4001-a77a-7b73a69213b0",
+    "id": "9b38ece8-2abe-4eaa",
     "ref_id": "order123",
-    "store_id": "storeABC",
-    "pickup_location_id": "780ae4q53-c8c9-3990-f669-7a62f58102a9",
-    "pickup_location_display_name": "2",
-    "created_at": "2018-05-10T01:12:32.659Z",
-    "updated_at": "2018-05-10T01:12:32.659Z",
-    "status": "ready_for_pickup",
+    "store_id": "cb8c37f2",
+    "pickup_location_id": null,
+    "pickup_location_display_name": null,
+    "created_at": "2018-08-09T18:34:43.728Z",
+    "updated_at": "2018-08-09T18:35:19.744Z",
+    "status": "on_the_line",
+    "human_readable_id": "103",
+    "user_id": "bbbf9e96-0c85",
     "user_ref_id": "user123",
-    "user_display_name": "John D"
+    "status_board_display_name": "John",
+    "special_instructions": "",
+    "line_items": [
+        {
+            "id": "85ad92d7-a0e5-4b97-822c-f2dc67d8c40c",
+            "item_id": "bacfda02-2568-4fdf",
+            "item_name": "drink",
+            "customer_name": "John",
+            "special_instructions": "",
+            "location_id": null,
+            "location_name": null
+        }
+    ]
 }
 ```
 
-Upate an order state
+Update the state of an order.
 
 ### Endpoint
 

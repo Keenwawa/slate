@@ -6,30 +6,32 @@
 
 ```json
 {
-  "id": "a09c4d73-8802-49fd-b278-5623509948d4",
-  "name": "1",
-  "order_id": "3f01ce65-bfe2-4411-a623-9440c73e40ae",
-  "updated_at": "2018-05-15T22:03:57.783Z",
-  "disabled": false,
-  "state": "order_unassigned"
+    "id": "a09c4d73-8802-49fd-b278-5623509948d4",
+    "store_id": "518fdc10-5772-11e4-7ed6-0700200c9a11",
+    "name": "1F",
+    "enabled": true,
+    "line_items": [
+        {
+            "id": "d01c055c-b7eb-42a8-9f1a-f68c2caa75a4"
+        }
+    ]
 }
 ```
 
 Attribute | Description
 --------- | -----------
 id | Unique ID that identifies the pickup location
+store_id | Unique ID that identifies the store the location belongs to
 name | Label of the pickup location that will be displayed to the user 
-order_id | Determines at a given point in time the order that the pickup location will process.
-updated_at| Last time the pickup location was updated
 disabled| Determines if a pickup location is in service or not
-state | State of the pickup location
+line_items | List of item IDs that are currently assigned or placed on a location
 
 ## Find Pickup Locations by store
 
 > Example Request
 
 ```curl
-curl "https://api.eatsa.com/v1/stores/518fdc10-5772-11e4-7ed6-0700200c9a11/pickup-locations" \
+curl "https://api.eatsa.com/v1/stores/518fdc10-5772-11e4-7ed6-0700200c9a11/locations" \
   -i -H "Content-Type:application/json; charset=utf-8"
 ```
 
@@ -38,30 +40,24 @@ curl "https://api.eatsa.com/v1/stores/518fdc10-5772-11e4-7ed6-0700200c9a11/picku
 ```json
 {
     "store_id": "518fdc10-5772-11e4-7ed6-0700200c9a11",
-    "pickup_locations": [
+    "locations": [
         {
-            "id": "a09c4d73-8802-49fd-b278-5623509948d4",
-            "name": "1",
-            "order_id": "3f01ce65-bfe2-4411-a623-9440c73e40ae",
-            "updated_at": "2018-05-15T22:03:57.783Z",
-            "disabled": false,
-            "state": "order_unassigned"
+            "id": "50c754f2-56e4-40dd-b490-464d3cf22dc8",
+            "store_id": "518fdc10-5772-11e4-7ed6-0700200c9a11",
+            "name": "1F",
+            "enabled": true,
+            "line_items": [
+                {
+                    "id": "d01c055c-b7eb-42a8-9f1a-f68c2caa75a4"
+                }
+            ]
         },
         {
-            "id": "29978afa-9b01-4d45-bfca-abd390f79483",
-            "name": "2",
-            "order_id": null,
-            "updated_at": "2018-05-13T22:20:35.804Z",
-            "disabled": false,
-            "state": "order_unassigned"
-        },
-        {
-            "id": "6bbef153-3e6b-472a-8466-e9b680bfec02",
-            "name": "3",
-            "order_id": null,
-            "updated_at": "2018-04-16T23:40:11.549Z",
-            "disabled": true,
-            "state": "order_unassigned"
+            "id": "52b0e613-073e-4e5d-86ed-2fbd49e7a19f",
+            "store_id": "518fdc10-5772-11e4-7ed6-0700200c9a11",
+            "name": "1R",
+            "enabled": true,
+            "line_items": []
         },
         {...},
         {...}
@@ -74,7 +70,7 @@ Retrieve store pickup locations, this allows to determine the state at any given
 
 ### Endpoint
 
-`GET https://api.eatsa.com/v1/stores/:storeId/pickup-locations`
+`GET https://api.eatsa.com/v1/stores/:storeId/locations`
 
 ### Request Arguments
 
@@ -93,10 +89,11 @@ Refer to pickup location object
 
 ```shell
 curl -X PUT \
-  https://api.eatsa.com/v1/stores/:store_id/pickup-locations/:pickupLocationId \
+  https://api.eatsa.com/v1/stores/:store_id/locations/enable \
   -H 'content-type: application/json; charset=utf-8' \
   -d '{
-        "disabled": true
+        "location": "e7b3fb20-349c-4876-b5b1-e9c971a83e2e",
+        "enabled": false
       }'
 ```
 
@@ -104,12 +101,11 @@ curl -X PUT \
 
 ```json
 {
-    "id": "8a184494-32f0-4a3f-82d2-5c1fb2f2c43e",
-    "name": "2",
-    "order_id": null,
-    "updated_at": "2018-05-10T05:07:08.453Z",
-    "disabled": true,
-    "state": "not_assigned"
+    "id": "e7b3fb20-349c-4876-b5b1-e9c971a83e2e",
+    "store_id": "518fdc10-5772-11e4-7ed6-0700200c9a11",
+    "name": "2F",
+    "enabled": false,
+    "line_items": []
 }
 ```
 
@@ -117,7 +113,7 @@ Eatsa allows partner to enable or disable a pickup location.
 
 ### Endpoint
 
-`PUT https://api.eatsa.com/v1/stores/:storeId/pickup-locations/:pickupLocationId`
+`PUT https://api.eatsa.com/v1/stores/:storeId/locations/:pickupLocationId`
 
 ### Request Arguments
 
