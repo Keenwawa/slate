@@ -126,5 +126,131 @@ disabled | yes  | Boolean flag that determines if a pickup location is in or out
 
 Refer to pickup location object
 
+## Assign an item to a location
+
+> Example Request
+
+```curl
+curl -X POST \
+  https://api.eatsa.eatsa.com/v1/location/assign \
+  -H 'Content-Type: application/json; charset=utf-8' \
+  -d '{
+      "line_item_id": "85ad92d7-a0e5-4b97-822c-f2dc67d8c40c"
+   }'
+
+```
+
+> Example Response
+
+```json
+{
+    "location_id": "a09c4d73-8802-49fd-b278-5623509948d4",
+    "location_name": "1F",
+    "enabled": true,
+    "line_items": [
+        {
+            "id": "85ad92d7-a0e5-4b97-822c-f2dc67d8c40c"
+        }
+    ]
+}
+```
+
+This action reserves a location where the item can be placed.
+
+
+### Endpoint
+
+`POST https://api.eatsa.eatsa.com/v1/location/assign`
+
+### Request Arguments
+
+Parameter | Required | Description
+--------- | ------- | -----------
+line_item_id | yes  | Line item id to request a pickup location
+
+### Response Arguments
+
+Parameter | Description
+--------- | ------- | -----------
+location_id | Location Id
+location_name | Human readable location name
+enabled | Determines if a location is enabled
+line_items | List of items assigned to a location 
+
+
+## Update an Order
+> Update order request.
+
+```shell
+curl -X PUT \
+  https://api.eatsa.com/v1/orders/:order_id \
+  -H 'content-type: application/json; charset=utf-8' \
+  -d '{
+        "status": "on_the_line"
+      }'
+```
+
+> Update order response.
+
+```json
+{
+    "id": "9b38ece8-2abe-4eaa",
+    "ref_id": "order123",
+    "store_id": "cb8c37f2",
+    "pickup_location_id": null,
+    "pickup_location_display_name": null,
+    "created_at": "2018-08-09T18:34:43.728Z",
+    "updated_at": "2018-08-09T18:35:19.744Z",
+    "status": "on_the_line",
+    "human_readable_id": "103",
+    "user_id": "bbbf9e96-0c85",
+    "user_ref_id": "user123",
+    "status_board_display_name": "John",
+    "special_instructions": "",
+    "line_items": [
+        {
+            "id": "85ad92d7-a0e5-4b97-822c-f2dc67d8c40c",
+            "item_id": "bacfda02-2568-4fdf",
+            "item_name": "drink",
+            "customer_name": "John",
+            "special_instructions": "",
+            "location_id": null,
+            "location_name": null
+        }
+    ]
+}
+```
+
+Update the state of an order.
+
+### Endpoint
+
+`PUT https://api.eatsa.com/v1/orders/:orderId`
+
+### Request Arguments
+
+Parameter | Required | Description
+--------- | ------- | -----------
+orderId | yes  | Order Id to update
+status | yes  | Valid order status
+
+### Response Arguments
+
+Refer to order object
+
+
+### Possible errors
+
+* http_status_code: 409 (Conflict) 
+* http_response_body:
+  * code: INVALID_REQUEST | NO_PICKUP_LOCATIONS_AVAILABLE
+  * message: Related with the violation. 
+
+<aside class="warning">
+If an attempt to set the order to “ready_for_pickup” results in an error related with no pickup location available 
+then the order is set to “ready_to_serve_again” automatically.
+</aside>
+
+
 
 
