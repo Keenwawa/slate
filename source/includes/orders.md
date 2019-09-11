@@ -296,7 +296,7 @@ email | no | Email of the user.
 
 Parameter | Required | Description
 --------- | ------- | -----------
-payment_type | yes | Type of payment method. Possible values ```cash```, ```credit_card```.
+payment_type | yes | Type of payment method used 
 amount | yes | Amount charged in cents
 
 ### Line Item object
