@@ -122,7 +122,7 @@ total | Total tax charged in cents
 
 Parameter | Required | Description
 --------- | ------- | -----------
-unlock_code | no | An alphanumeric code that will be used to open a pickup device. If present on the order, the pickup device will be locked and require the code entered in order to open.
+unlock_code | no | A numeric code that will be used to open a pickup device. If present on the order, the pickup device will be locked and require the code entered in order to open.
 
 <!--- 
   last_cubbied_at | Timestamp that is updated every time an order is placed in a pickup location. 
@@ -344,7 +344,7 @@ amount | yes | Total tax charged in cents
 
 Parameter | Required | Description
 --------- | ------- | -----------
-unlock_code | no | An alphanumeric code that will be used to open a pickup device. If present on the order, the pickup device will be locked and require the code entered in order to open.
+unlock_code | no | A numeric code that will be used to open a pickup device. If present on the order, the pickup device will be locked and require the code entered in order to open.
 
 
 
