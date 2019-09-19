@@ -273,6 +273,7 @@ store_id | yes | Store where the order will be created
 user | yes | The user object (see below)
 scheduled_time | no | The date and time the order is scheduled to be fulfilled, if not present or null the assumptions is an ASAP order
 status_board_display_name | no | Name that will be displayed on the status board to inform the customer of their order. If not supplied the name will be infered from the user's first and last name.
+unlock_code | no | An alphanumeric code that will be used to open a pickup device. If present on the order, the pickup device will be locked and require the code entered in order to open
 channel | no | Indicates the channel making the request
 service_type | no | Indicates the how the order will be packaged. Possible values: ```dine_in```, ```take_out```. Defaults to ```take_out```.
 total | no | Total charged after taxes and promotions
@@ -352,6 +353,7 @@ curl "https://api.eatsa.com/v1/orders/54ebb9f9" \
     "eta": "2019-06-25T21:51:51.943949Z",
     "status": "attendant_canceled",
     "human_readable_id": "900",
+    "unlock_code": "1234",
     "user_id": "b4f87247-c812-4f19-b60b-58bebcb0309c",
     "user_ref_id": "u-rd000002",
     "status_board_display_name": "John D.",
