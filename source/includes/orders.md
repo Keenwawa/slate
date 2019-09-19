@@ -20,6 +20,9 @@
     "status_board_display_name": "John",
     "service_type": "take_out",
     "special_instructions": "all sauces on the side - thanks!",
+    "authorization": {
+        "unlock_code": "1234"
+    },
     "line_items": [
         {
             "id": "85ad92d7-a0e5-4b97-822c-f2dc67d8c40c",
@@ -81,6 +84,7 @@ special_instructions | Text that indicates any special instructions for the orde
 service_type | Optional, indicates the how the order will be packaged. Possible values: ```dine_in```, ```take_out```. Defaults to ```take_out```.
 channel | Optional, indicates the channel making the request
 total | Order amount in cents
+authorization | Optional, information related to any customer authorization needed to access the order
 line_items | Collection of Line Item objects
 
 ### Line Item object
@@ -114,6 +118,11 @@ tax_id | Reference id for the tax
 tax_name | Name of the tax
 total | Total tax charged in cents
 
+### Authorization object
+
+Parameter | Required | Description
+--------- | ------- | -----------
+unlock_code | no | An alphanumeric code that will be used to open a pickup device. If present on the order, the pickup device will be locked and require the code entered in order to open.
 
 <!--- 
   last_cubbied_at | Timestamp that is updated every time an order is placed in a pickup location. 
@@ -153,6 +162,9 @@ curl -X POST \
           ],
           "status_board_display_name": null,
           "special_instructions": "Handle with care",
+          "authorization": {
+              "unlock_code": "1234"
+          },
            "line_items": [
             {
               "item_id": "6a834a14",
@@ -207,6 +219,9 @@ curl -X POST \
     "special_instructions": "Handle with care",
     "service_type": "take_out",
     "total": 500,
+    "authorization": {
+        "unlock_code": "1234"
+    },
     "line_items": [
         {
             "id": "8b84ab2c-2177",
@@ -273,11 +288,11 @@ store_id | yes | Store where the order will be created
 user | yes | The user object (see below)
 scheduled_time | no | The date and time the order is scheduled to be fulfilled, if not present or null the assumptions is an ASAP order
 status_board_display_name | no | Name that will be displayed on the status board to inform the customer of their order. If not supplied the name will be infered from the user's first and last name.
-unlock_code | no | An alphanumeric code that will be used to open a pickup device. If present on the order, the pickup device will be locked and require the code entered in order to open
 channel | no | Indicates the channel making the request
 service_type | no | Indicates the how the order will be packaged. Possible values: ```dine_in```, ```take_out```. Defaults to ```take_out```.
 total | no | Total charged after taxes and promotions
 payments | no | Collection of Payments (see below)
+authorization | Information related to any customer authorization needed to access the order
 line_items | yes | Collection of Line Items (see below)
 
 <!---
@@ -325,7 +340,11 @@ id | yes | Reference id for the tax
 name | yes | Name of the tax
 amount | yes | Total tax charged in cents
 
+### Authorization object
 
+Parameter | Required | Description
+--------- | ------- | -----------
+unlock_code | no | An alphanumeric code that will be used to open a pickup device. If present on the order, the pickup device will be locked and require the code entered in order to open.
 
 
 
@@ -353,13 +372,15 @@ curl "https://api.eatsa.com/v1/orders/54ebb9f9" \
     "eta": "2019-06-25T21:51:51.943949Z",
     "status": "attendant_canceled",
     "human_readable_id": "900",
-    "unlock_code": "1234",
     "user_id": "b4f87247-c812-4f19-b60b-58bebcb0309c",
     "user_ref_id": "u-rd000002",
     "status_board_display_name": "John D.",
     "special_instructions": "Handle with care",
     "service_type": "take_out",
     "total": 500,
+    "authorization": {
+        "unlock_code": "1234"
+    },
     "line_items": [
         {
             "id": "8b84ab2c",
@@ -475,6 +496,7 @@ curl "https://api.eatsa.com/v1/order-analytics?created_at_after=2019-06-23&page=
       "currency": "USD",
       "status": "delivered_to_customer",
       "special_instructions": null,
+      "authorization": null,
       "line_items": [
         {
           "id": "b2225252",
